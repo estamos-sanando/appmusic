@@ -1,69 +1,106 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Music2, Zap, Users, Clock } from 'lucide-react';
+import { SpotifyConnectButton } from '@/components/SpotifyConnectButton';
 
-export default function Home() {
+interface SearchParamsProps {
+  searchParams: Promise<{ error?: string }>;
+}
+
+export default async function HomePage({ searchParams }: SearchParamsProps) {
+  const params = await searchParams;
+  const error = params.error;
+
+  const errorMessages: Record<string, string> = {
+    spotify_denied: 'Cancelaste la conexión con Spotify.',
+    invalid_state: 'Error de seguridad. Intentá de nuevo.',
+    token_exchange_failed: 'No se pudo conectar con Spotify. Intentá de nuevo.',
+  };
+
+  const features = [
+    {
+      icon: Zap,
+      title: 'En tiempo real',
+      desc: 'Ves lo que escucha al instante, con latencia de segundos.',
+    },
+    {
+      icon: Users,
+      title: 'Solo para dos',
+      desc: 'Una sala privada, máximo 2 personas. Simple y íntimo.',
+    },
+    {
+      icon: Clock,
+      title: 'Historial del día',
+      desc: 'Timeline unificado de lo que escucharon juntos hoy.',
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-rose-600/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto">
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-600 to-rose-700 flex items-center justify-center shadow-lg shadow-rose-900/40">
+            <Music2 size={24} className="text-white" />
+          </div>
+          <h1 className="font-righteous text-4xl sm:text-5xl text-white tracking-tight">
+            DuoVibe
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Tagline */}
+        <p className="text-xl sm:text-2xl text-zinc-300 font-light leading-relaxed mb-2">
+          Música compartida{' '}
+          <span className="text-rose-400 font-medium">en tiempo real</span>
+        </p>
+        <p className="text-zinc-500 text-sm mb-10 max-w-sm">
+          Conectá tu Spotify, invitá a alguien especial y escuchen juntos — sin importar la distancia.
+        </p>
+
+        {/* Error banner */}
+        {error && (
+          <div className="w-full mb-6 px-4 py-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-300 text-sm">
+            {errorMessages[error] ?? 'Ocurrió un error. Intentá de nuevo.'}
+          </div>
+        )}
+
+        {/* CTA */}
+        <SpotifyConnectButton size="lg" label="Empezar con Spotify" />
+
+        <p className="text-xs text-zinc-700 mt-4">
+          Solo se solicitan permisos de lectura. No modificamos tu cuenta.
+        </p>
+
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-14 w-full">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="flex flex-col items-center text-center p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/50"
+            >
+              <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center mb-3">
+                <f.icon size={18} className="text-rose-400" />
+              </div>
+              <p className="text-sm font-semibold text-zinc-200 mb-1">{f.title}</p>
+              <p className="text-xs text-zinc-500 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="absolute bottom-6 text-xs text-zinc-700">
+        <Link href="#" className="hover:text-zinc-500 transition-colors">
+          Privacidad
+        </Link>
+        {' · '}
+        <span>DuoVibe © 2026</span>
+      </footer>
+    </main>
   );
 }
