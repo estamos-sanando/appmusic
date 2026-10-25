@@ -9,14 +9,25 @@ const SPOTIFY_SCOPES = [
   'user-read-email',
 ].join(' ');
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const redirectUri =
+    process.env.SPOTIFY_REDIRECT_URI ||
+    `${request.nextUrl.origin}/api/auth/spotify/callback`;
+
+  if (!clientId) {
+    const errorUrl = new URL('/', request.url);
+    errorUrl.searchParams.set('error', 'missing_client_id');
+    return NextResponse.redirect(errorUrl);
+  }
+
   const state = crypto.randomBytes(16).toString('hex');
 
   const params = new URLSearchParams({
     response_type: 'code',
-    client_id: process.env.SPOTIFY_CLIENT_ID!,
+    client_id: clientId,
     scope: SPOTIFY_SCOPES,
-    redirect_uri: process.env.SPOTIFY_REDIRECT_URI!,
+    redirect_uri: redirectUri,
     state,
   });
 

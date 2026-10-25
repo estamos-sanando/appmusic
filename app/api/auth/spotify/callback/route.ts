@@ -23,8 +23,16 @@ export async function GET(request: NextRequest) {
   }
 
   // Exchange code for tokens
-  const clientId = process.env.SPOTIFY_CLIENT_ID!;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET!;
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const redirectUri =
+    process.env.SPOTIFY_REDIRECT_URI ||
+    `${request.nextUrl.origin}/api/auth/spotify/callback`;
+
+  if (!clientId || !clientSecret) {
+    return NextResponse.redirect(`${appUrl}/?error=missing_client_id`);
+  }
+
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   const tokenRes = await fetch(SPOTIFY_TOKEN_URL, {
@@ -36,7 +44,7 @@ export async function GET(request: NextRequest) {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: process.env.SPOTIFY_REDIRECT_URI!,
+      redirect_uri: redirectUri,
     }),
   });
 

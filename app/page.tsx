@@ -14,6 +14,7 @@ export default async function HomePage({ searchParams }: SearchParamsProps) {
     spotify_denied: 'Cancelaste la conexión con Spotify.',
     invalid_state: 'Error de seguridad. Intentá de nuevo.',
     token_exchange_failed: 'No se pudo conectar con Spotify. Intentá de nuevo.',
+    missing_client_id: 'Faltan configurar las variables de entorno de Spotify (SPOTIFY_CLIENT_ID en Vercel o .env.local).',
   };
 
   const features = [
