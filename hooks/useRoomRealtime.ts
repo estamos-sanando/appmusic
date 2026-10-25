@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { NowPlaying } from '@/types';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 interface UseRoomRealtimeOptions {
   roomId: string;
@@ -22,11 +22,13 @@ export function useRoomRealtime({
   const supabase = createClient();
 
   const handlePayload = useCallback(
-    (payload: { new: NowPlaying }) => {
-      const updated = payload.new;
-      if (!partnerUserId || updated.user_id !== partnerUserId) return;
-      setPartnerNowPlaying(updated);
-      onNowPlayingUpdate?.(updated);
+    (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        const updated = payload.new as unknown as NowPlaying;
+        if (!partnerUserId || updated.user_id !== partnerUserId) return;
+        setPartnerNowPlaying(updated);
+        onNowPlayingUpdate?.(updated);
+      }
     },
     [partnerUserId, onNowPlayingUpdate]
   );
